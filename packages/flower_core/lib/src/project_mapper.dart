@@ -10,8 +10,8 @@ import 'project_map.dart';
 
 /// Builds an analyzer-backed dependency map for one Dart or Flutter package.
 final class ProjectMapper {
-  const ProjectMapper({ProjectInspector inspector = const ProjectInspector()})
-    : _inspector = inspector;
+  const ProjectMapper({ProjectInspector? inspector})
+    : _inspector = inspector ?? const ProjectInspector();
 
   final ProjectInspector _inspector;
 
