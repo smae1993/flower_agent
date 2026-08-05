@@ -103,7 +103,9 @@ final class ProjectContext {
 
     if (queryTerms.isNotEmpty) {
       buffer
-        ..writeln('**Query terms:** ${queryTerms.map((term) => '`$term`').join(', ')}')
+        ..writeln(
+          '**Query terms:** ${queryTerms.map((term) => '`$term`').join(', ')}',
+        )
         ..writeln();
     }
 
@@ -157,7 +159,8 @@ final class ProjectContext {
         ..writeln('## Relevant routes')
         ..writeln();
       for (final route in routes) {
-        final label = route.name ?? route.path ?? route.declaration ?? '<unnamed>';
+        final label =
+            route.name ?? route.path ?? route.declaration ?? '<unnamed>';
         buffer.writeln(
           '- `$label` via `${route.router}` '
           'in `${route.sourcePath}:${route.line}`',
