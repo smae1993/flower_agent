@@ -268,27 +268,40 @@ final class _SymbolCollector extends RecursiveAstVisitor<void> {
     final routeType = node.constructorName.type.toSource().split('<').first;
     final router = _routerForType(routeType);
     if (router != null) {
-      final pathExpression = _namedArgument(node.argumentList, 'path');
-      final nameExpression = _namedArgument(node.argumentList, 'name');
-      final declarationExpression =
-          _namedArgument(node.argumentList, 'page') ??
-          _namedArgument(node.argumentList, 'builder') ??
-          _namedArgument(node.argumentList, 'pageBuilder');
-      routes.add(
-        ProjectRoute(
-          router: router,
-          path:
-              _stringValue(pathExpression) ??
-              (router == 'get' ? _stringValue(nameExpression) : null),
-          name: router == 'get' ? null : _stringValue(nameExpression),
-          declaration: declarationExpression?.toSource(),
-          sourcePath: sourcePath,
-          feature: feature,
-          line: _lineFor(node.offset),
-        ),
-      );
+      _recordRoute(router, node.argumentList, node.offset);
     }
     super.visitInstanceCreationExpression(node);
+  }
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    final router = _routerForType(node.methodName.name);
+    if (router != null) {
+      _recordRoute(router, node.argumentList, node.offset);
+    }
+    super.visitMethodInvocation(node);
+  }
+
+  void _recordRoute(String router, ArgumentList arguments, int offset) {
+    final pathExpression = _namedArgument(arguments, 'path');
+    final nameExpression = _namedArgument(arguments, 'name');
+    final declarationExpression =
+        _namedArgument(arguments, 'page') ??
+        _namedArgument(arguments, 'builder') ??
+        _namedArgument(arguments, 'pageBuilder');
+    routes.add(
+      ProjectRoute(
+        router: router,
+        path:
+            _stringValue(pathExpression) ??
+            (router == 'get' ? _stringValue(nameExpression) : null),
+        name: router == 'get' ? null : _stringValue(nameExpression),
+        declaration: declarationExpression?.toSource(),
+        sourcePath: sourcePath,
+        feature: feature,
+        line: _lineFor(offset),
+      ),
+    );
   }
 
   ProjectSymbolKind? _classify(String name, Iterable<String> supertypes) {
