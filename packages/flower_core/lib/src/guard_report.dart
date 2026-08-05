@@ -54,8 +54,7 @@ final class GuardReport {
 
   Map<GuardSeverity, int> get counts => <GuardSeverity, int>{
     for (final severity in GuardSeverity.values)
-      severity:
-          violations.where((item) => item.severity == severity).length,
+      severity: violations.where((item) => item.severity == severity).length,
   };
 
   bool hasViolationsAtOrAbove(GuardSeverity severity) =>
