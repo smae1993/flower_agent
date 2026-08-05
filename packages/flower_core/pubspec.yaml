@@ -1,6 +1,6 @@
 name: flower_core
 description: Deterministic project intelligence and initialization primitives for Flower Agent.
-version: 0.3.0-dev.1
+version: 0.4.0-dev.1
 repository: https://github.com/smae1993/flower_agent
 issue_tracker: https://github.com/smae1993/flower_agent/issues
 resolution: workspace
