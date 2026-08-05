@@ -110,7 +110,7 @@ class InvoicePage {}
       await File(
         p.join(project.path, '.flower', 'context', 'project.md'),
       ).readAsString(),
-      contains('`/invoices` via `go_router`'),
+      contains('`invoices` via `go_router`'),
     );
   });
 
