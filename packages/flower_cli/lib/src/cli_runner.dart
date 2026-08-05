@@ -155,11 +155,12 @@ final class FlowerCli {
     final projectPath = _resolveProjectPath(command);
     final requestedKind = command['kind'] as String?;
     final feature = command['feature'] as String?;
-    final kind = requestedKind == null ? null : _symbolKindByName(requestedKind);
-    final index = (await _symbolIndexer.build(projectPath)).filtered(
-      kind: kind,
-      feature: feature,
-    );
+    final kind = requestedKind == null
+        ? null
+        : _symbolKindByName(requestedKind);
+    final index = (await _symbolIndexer.build(
+      projectPath,
+    )).filtered(kind: kind, feature: feature);
 
     if (command['json'] as bool) {
       output.writeln(
@@ -223,7 +224,8 @@ final class FlowerCli {
       output.writeln();
       output.writeln('Routes');
       for (final route in snapshot.routes) {
-        final label = route.name ?? route.path ?? route.declaration ?? '<unnamed>';
+        final label =
+            route.name ?? route.path ?? route.declaration ?? '<unnamed>';
         output.writeln('  - $label (${route.router})');
       }
     }
@@ -327,7 +329,8 @@ final class FlowerCli {
         ..writeln()
         ..writeln('Routes');
       for (final route in index.routes) {
-        final label = route.name ?? route.path ?? route.declaration ?? '<unnamed>';
+        final label =
+            route.name ?? route.path ?? route.declaration ?? '<unnamed>';
         output.writeln(
           '  - $label [${route.router}] '
           '(${route.sourcePath}:${route.line})',
