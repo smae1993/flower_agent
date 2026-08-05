@@ -11,9 +11,9 @@ import 'project_symbol_indexer.dart';
 final class ProjectInspector {
   const ProjectInspector({
     ProjectSymbolIndexer symbolIndexer = const ProjectSymbolIndexer(),
-  }) : _symbolIndexer = symbolIndexer;
+  }) : _architectureIndexer = symbolIndexer;
 
-  final ProjectSymbolIndexer _symbolIndexer;
+  final ProjectSymbolIndexer _architectureIndexer;
 
   static const Map<String, List<String>> _technologyCandidates =
       <String, List<String>>{
@@ -98,7 +98,7 @@ final class ProjectInspector {
     );
     final featureNames = await _detectFeatures(root);
     final technologies = _detectTechnologies(dependencyNames);
-    final symbolIndex = await _symbolIndexer.build(root.path);
+    final symbolIndex = await _architectureIndexer.build(root.path);
 
     final warnings = <String>[];
     if (!isFlutterProject) {
