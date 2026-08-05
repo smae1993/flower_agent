@@ -116,8 +116,9 @@ final class LayerDependencyRule implements ArchitectureRule {
       if (sourceLayer == null || targetLayer == null) {
         continue;
       }
-      if (!(_forbiddenTargets[sourceLayer] ?? const <String>{})
-          .contains(targetLayer)) {
+      if (!(_forbiddenTargets[sourceLayer] ?? const <String>{}).contains(
+        targetLayer,
+      )) {
         continue;
       }
 
@@ -160,13 +161,15 @@ final class DomainFlutterDependencyRule implements ArchitectureRule {
       if (node.generated || !_isDomainPath(node.path)) {
         continue;
       }
-      final flutterPackages = node.externalPackages
-          .where(
-            (packageName) =>
-                packageName == 'flutter' || packageName.startsWith('flutter_'),
-          )
-          .toList()
-        ..sort();
+      final flutterPackages =
+          node.externalPackages
+              .where(
+                (packageName) =>
+                    packageName == 'flutter' ||
+                    packageName.startsWith('flutter_'),
+              )
+              .toList()
+            ..sort();
       if (flutterPackages.isEmpty) {
         continue;
       }
