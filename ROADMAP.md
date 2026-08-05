@@ -71,19 +71,22 @@ Target: inspect an existing Flutter project and create Flower's project-local wo
 
 Target: give an agent the smallest trustworthy context needed for a task.
 
-- [ ] Add `flower context "task description"`.
-- [ ] Rank files by symbols, imports, feature proximity, and project rules.
+- [x] Add `flower context "task description"`.
+- [x] Rank files by symbols, imports, feature proximity, routes, and file paths.
 - [ ] Include relevant architecture decisions and conventions.
-- [ ] Explain why each file was selected.
-- [ ] Add configurable context budgets.
-- [ ] Support Markdown and JSON output.
+- [x] Explain why each file was selected.
+- [x] Add a configurable file-count context budget.
+- [x] Support Markdown and JSON output.
+- [x] Support English identifiers and initial Persian task aliases.
+- [ ] Add project-defined task aliases and terminology.
+- [ ] Include relevant tests and non-`lib` project files.
 - [ ] Measure context precision on real Flower dogfood projects.
 
 Exit criteria:
 
-- A task-specific context is materially smaller than broad repository scanning.
-- Every selected file includes a deterministic reason.
-- Context generation works without network access.
+- [ ] A task-specific context is materially smaller than broad repository scanning on production projects.
+- [x] Every selected file includes a deterministic reason.
+- [x] Context generation works without network access.
 
 ## Phase 3 — Architecture Guard
 
@@ -193,8 +196,16 @@ Target: add high-value workflows after the intelligence layer is reliable.
 
 ### `0.3.0-dev.1`
 
-- Task-specific context engine
+- Deterministic task-specific context engine
 - `flower context`
+- Markdown and JSON context contracts
+- File-count context budget and selection explanations
+
+### `0.3.0-dev.2`
+
+- Project terminology and task aliases
+- Test and configuration-file context
+- Production-project context evaluation
 
 ### `0.4.0-dev.1`
 
