@@ -73,7 +73,10 @@ class Order {}
 
     expect(result, 3);
     expect(errors.toString(), isEmpty);
-    expect(output.toString(), startsWith('Flower Agent architecture guard'));
+    expect(
+      output.toString(),
+      startsWith('Flower Agent architecture guard'),
+    );
     expect(output.toString(), contains('domain_flutter_dependency'));
     expect(output.toString(), contains('Result: failed'));
   });
