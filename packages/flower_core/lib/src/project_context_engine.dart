@@ -134,19 +134,20 @@ final class ProjectContextEngine {
       );
     }
 
-    final ranked = candidates.values
-        .where((candidate) => candidate.score > 0)
-        .toList()
-      ..sort((left, right) {
-        final scoreOrder = right.score.compareTo(left.score);
-        if (scoreOrder != 0) {
-          return scoreOrder;
-        }
-        return left.node.path.compareTo(right.node.path);
-      });
+    final ranked =
+        candidates.values.where((candidate) => candidate.score > 0).toList()
+          ..sort((left, right) {
+            final scoreOrder = right.score.compareTo(left.score);
+            if (scoreOrder != 0) {
+              return scoreOrder;
+            }
+            return left.node.path.compareTo(right.node.path);
+          });
 
     final selected = ranked.take(limit).toList(growable: false);
-    final selectedPaths = selected.map((candidate) => candidate.node.path).toSet();
+    final selectedPaths = selected
+        .map((candidate) => candidate.node.path)
+        .toSet();
     final files = <ContextFile>[
       for (final candidate in selected)
         ContextFile(
@@ -160,19 +161,18 @@ final class ProjectContextEngine {
                     const <ProjectSymbol>[])
               ContextSymbol(name: symbol.name, kind: symbol.kind),
           ],
-          dependencies: (dependencies[candidate.node.path] ?? const <String>{})
-              .toList()
-            ..sort(),
-          dependents: (dependents[candidate.node.path] ?? const <String>{})
-              .toList()
-            ..sort(),
+          dependencies:
+              (dependencies[candidate.node.path] ?? const <String>{}).toList()
+                ..sort(),
+          dependents:
+              (dependents[candidate.node.path] ?? const <String>{}).toList()
+                ..sort(),
         ),
     ];
     final matchedFeatures = <String>{
       for (final file in files)
         if (file.feature != null) file.feature!,
-    }.toList()
-      ..sort();
+    }.toList()..sort();
     final relevantRoutes = symbolIndex.routes
         .where((route) => selectedPaths.contains(route.sourcePath))
         .toList(growable: false);
@@ -289,7 +289,8 @@ final class ProjectContextEngine {
       if (matched.isEmpty) {
         continue;
       }
-      final label = route.name ?? route.path ?? route.declaration ?? '<unnamed>';
+      final label =
+          route.name ?? route.path ?? route.declaration ?? '<unnamed>';
       candidate
         ..score += 60
         ..reasons.add('Defines matched route `$label` via ${route.router}.');
@@ -356,15 +357,13 @@ final class ProjectContextEngine {
           (dependents[candidate.node.path]?.length ?? 0);
       if (degree > 0) {
         candidate
-          ..score += degree.clamp(1, 20)
+          ..score += degree.clamp(1, 20).toInt()
           ..reasons.add('Connected project file fallback with degree $degree.');
       }
     }
   }
 
-  Map<String, List<ProjectSymbol>> _symbolsByPath(
-    List<ProjectSymbol> symbols,
-  ) {
+  Map<String, List<ProjectSymbol>> _symbolsByPath(List<ProjectSymbol> symbols) {
     final result = <String, List<ProjectSymbol>>{};
     for (final symbol in symbols) {
       result.putIfAbsent(symbol.path, () => <ProjectSymbol>[]).add(symbol);
@@ -409,9 +408,7 @@ final class ProjectContextEngine {
         .toLowerCase()
         .replaceAll('ي', 'ی')
         .replaceAll('ك', 'ک');
-    for (final token in normalized.split(
-      RegExp(r'[^a-z0-9؀-ۿ]+'),
-    )) {
+    for (final token in normalized.split(RegExp(r'[^a-z0-9؀-ۿ]+'))) {
       if (token.isNotEmpty) {
         yield token;
       }
