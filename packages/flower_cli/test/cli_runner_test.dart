@@ -113,13 +113,7 @@ void main() {
     final errors = StringBuffer();
 
     final result = await FlowerCli().run(
-      <String>[
-        'map',
-        project.path,
-        '--feature',
-        'home',
-        '--mermaid',
-      ],
+      <String>['map', project.path, '--feature', 'home', '--mermaid'],
       out: output,
       err: errors,
     );
