@@ -73,7 +73,9 @@ final class FlowerCli {
     final snapshot = await _inspector.inspect(projectPath);
 
     if (command['json'] as bool) {
-      output.writeln(const JsonEncoder.withIndent('  ').convert(snapshot.toJson()));
+      output.writeln(
+        const JsonEncoder.withIndent('  ').convert(snapshot.toJson()),
+      );
     } else {
       _writeSnapshot(output, snapshot);
     }
