@@ -10,16 +10,19 @@ final class FlowerCli {
     ProjectInspector inspector = const ProjectInspector(),
     ProjectInitializer? initializer,
     ProjectMapper? mapper,
+    ProjectSymbolIndexer symbolIndexer = const ProjectSymbolIndexer(),
   }) : _inspector = inspector,
        _initializer = initializer ?? ProjectInitializer(inspector: inspector),
        _mapper = mapper ?? ProjectMapper(inspector: inspector),
+       _architectureIndexer = symbolIndexer,
        _parser = _buildParser();
 
-  static const String version = '0.1.0-dev.1';
+  static const String version = '0.2.0-dev.2';
 
   final ProjectInspector _inspector;
   final ProjectInitializer _initializer;
   final ProjectMapper _mapper;
+  final ProjectSymbolIndexer _architectureIndexer;
   final ArgParser _parser;
 
   Future<int> run(
@@ -61,6 +64,7 @@ final class FlowerCli {
         'inspect' => await _runInspect(command, output),
         'init' => await _runInit(command, output),
         'map' => await _runMap(command, output),
+        'symbols' => await _runSymbols(command, output),
         _ => _unknownCommand(command.name, errorOutput),
       };
     } on FlowerException catch (error) {
@@ -147,6 +151,32 @@ final class FlowerCli {
     return 0;
   }
 
+  Future<int> _runSymbols(ArgResults command, StringSink output) async {
+    final projectPath = _resolveProjectPath(command);
+    final requestedKind = command['kind'] as String?;
+    final feature = command['feature'] as String?;
+    final kind = requestedKind == null
+        ? null
+        : _symbolKindByName(requestedKind);
+    final index = (await _architectureIndexer.build(
+      projectPath,
+    )).filtered(kind: kind, feature: feature);
+
+    if (command['json'] as bool) {
+      output.writeln(
+        const JsonEncoder.withIndent('  ').convert(index.toJson()),
+      );
+    } else {
+      _writeSymbolIndex(
+        output,
+        index,
+        requestedKind: requestedKind,
+        requestedFeature: feature,
+      );
+    }
+    return 0;
+  }
+
   void _writeSnapshot(StringSink output, ProjectSnapshot snapshot) {
     output
       ..writeln('Flower Agent inspection')
@@ -179,6 +209,24 @@ final class FlowerCli {
       for (final entry in snapshot.technologies.entries) {
         final category = entry.key.replaceAll('_', ' ');
         output.writeln('  $category: ${entry.value.join(', ')}');
+      }
+    }
+
+    output
+      ..writeln()
+      ..writeln('Architecture');
+    for (final entry in snapshot.symbolCounts.entries) {
+      output.writeln('  ${entry.key}: ${entry.value}');
+    }
+    output.writeln('  routes: ${snapshot.routes.length}');
+
+    if (snapshot.routes.isNotEmpty) {
+      output.writeln();
+      output.writeln('Routes');
+      for (final route in snapshot.routes) {
+        final label =
+            route.name ?? route.path ?? route.declaration ?? '<unnamed>';
+        output.writeln('  - $label (${route.router})');
       }
     }
 
@@ -238,6 +286,68 @@ final class FlowerCli {
     }
   }
 
+  void _writeSymbolIndex(
+    StringSink output,
+    ProjectSymbolIndex index, {
+    String? requestedKind,
+    String? requestedFeature,
+  }) {
+    output
+      ..writeln('Flower Agent symbol index')
+      ..writeln('Project: ${index.packageName}')
+      ..writeln('Root: ${index.rootPath}');
+
+    if (requestedKind != null) {
+      output.writeln('Kind: $requestedKind');
+    }
+    if (requestedFeature != null && requestedFeature.trim().isNotEmpty) {
+      output.writeln('Feature: ${requestedFeature.trim()}');
+    }
+
+    output
+      ..writeln()
+      ..writeln('Counts');
+    for (final entry in index.counts.entries) {
+      output.writeln('  ${entry.key.name}: ${entry.value}');
+    }
+    output.writeln('  routes: ${index.routes.length}');
+
+    if (index.symbols.isNotEmpty) {
+      output
+        ..writeln()
+        ..writeln('Symbols');
+      for (final symbol in index.symbols) {
+        output.writeln(
+          '  - ${symbol.kind.name}: ${symbol.name} '
+          '(${symbol.path}:${symbol.line})',
+        );
+      }
+    }
+
+    if (index.routes.isNotEmpty) {
+      output
+        ..writeln()
+        ..writeln('Routes');
+      for (final route in index.routes) {
+        final label =
+            route.name ?? route.path ?? route.declaration ?? '<unnamed>';
+        output.writeln(
+          '  - $label [${route.router}] '
+          '(${route.sourcePath}:${route.line})',
+        );
+      }
+    }
+  }
+
+  ProjectSymbolKind _symbolKindByName(String name) {
+    for (final kind in ProjectSymbolKind.values) {
+      if (kind.name == name) {
+        return kind;
+      }
+    }
+    throw FlowerException('Unsupported symbol kind: $name');
+  }
+
   String _resolveProjectPath(ArgResults command) {
     if (command.rest.isNotEmpty) {
       return command.rest.first;
@@ -263,7 +373,8 @@ final class FlowerCli {
       ..writeln('  flower inspect . --json')
       ..writeln('  flower init')
       ..writeln('  flower map --mermaid')
-      ..writeln('  flower map --feature invoices --json');
+      ..writeln('  flower map --feature invoices --json')
+      ..writeln('  flower symbols --kind repository --json');
   }
 
   void _writeCommandUsage(StringSink output, String commandName) {
@@ -323,11 +434,37 @@ final class FlowerCli {
       ..addFlag('mermaid', negatable: false, help: 'Write a Mermaid flowchart.')
       ..addFlag('help', abbr: 'h', negatable: false);
 
+    final symbolsParser = ArgParser()
+      ..addOption(
+        'path',
+        abbr: 'p',
+        defaultsTo: '.',
+        help: 'Path to the Dart or Flutter project root.',
+      )
+      ..addOption(
+        'kind',
+        abbr: 'k',
+        allowed: ProjectSymbolKind.values.map((kind) => kind.name),
+        help: 'Limit symbols to one architectural role.',
+      )
+      ..addOption(
+        'feature',
+        abbr: 'f',
+        help: 'Limit symbols and routes to one feature-first directory.',
+      )
+      ..addFlag(
+        'json',
+        negatable: false,
+        help: 'Write the stable machine-readable symbol index.',
+      )
+      ..addFlag('help', abbr: 'h', negatable: false);
+
     return ArgParser()
       ..addFlag('help', abbr: 'h', negatable: false)
       ..addFlag('version', negatable: false)
       ..addCommand('inspect', inspectParser)
       ..addCommand('init', initParser)
-      ..addCommand('map', mapParser);
+      ..addCommand('map', mapParser)
+      ..addCommand('symbols', symbolsParser);
   }
 }

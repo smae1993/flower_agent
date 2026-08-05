@@ -33,7 +33,17 @@ flutter:
     ).create(recursive: true);
     await File(
       p.join(project.path, 'lib', 'features', 'invoices', 'invoice_page.dart'),
-    ).writeAsString('class InvoicePage {}');
+    ).writeAsString('''
+class InvoiceController {}
+
+final invoiceRoute = GoRoute(
+  path: '/invoices',
+  name: 'invoices',
+  builder: (context, state) => InvoicePage(),
+);
+
+class InvoicePage {}
+''');
     await File(
       p.join(project.path, 'lib', 'features', 'invoices', 'invoice.g.dart'),
     ).writeAsString('// generated');
@@ -66,6 +76,10 @@ flutter:
     expect(snapshot.technologies['routing'], contains('go_router'));
     expect(snapshot.technologies['networking'], contains('dio'));
     expect(snapshot.technologies['database'], contains('drift'));
+    expect(snapshot.symbolCounts['controller'], 1);
+    expect(snapshot.routes, hasLength(1));
+    expect(snapshot.routes.single.path, '/invoices');
+    expect(snapshot.toJson()['schemaVersion'], 2);
     expect(snapshot.warnings, isEmpty);
   });
 
@@ -86,7 +100,17 @@ flutter:
     expect(await agentsFile.readAsString(), 'Existing project instructions.');
     expect(
       await File(p.join(project.path, '.flower', 'flower.yaml')).readAsString(),
-      contains('name: "sample_app"'),
+      allOf(
+        contains('name: "sample_app"'),
+        contains('controller: 1'),
+        contains('routes: 1'),
+      ),
+    );
+    expect(
+      await File(
+        p.join(project.path, '.flower', 'context', 'project.md'),
+      ).readAsString(),
+      contains('`invoices` via `go_router`'),
     );
   });
 

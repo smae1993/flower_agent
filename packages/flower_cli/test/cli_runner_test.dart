@@ -38,7 +38,21 @@ void main() {
         'presentation',
         'home_page.dart',
       ),
-    ).writeAsString('class HomePage {}');
+    ).writeAsString('''
+abstract class HomeRepository {}
+
+class HomeController {}
+
+final homeProvider = Provider((ref) => HomeController());
+
+final homeRoute = GoRoute(
+  path: '/home',
+  name: 'home',
+  builder: (context, state) => HomePage(),
+);
+
+class HomePage {}
+''');
   });
 
   tearDown(() async {
@@ -60,8 +74,15 @@ void main() {
     expect(result, 0);
     expect(errors.toString(), isEmpty);
     final decoded = jsonDecode(output.toString()) as Map<String, Object?>;
+    expect(decoded['schemaVersion'], 2);
     expect(decoded['packageName'], 'cli_sample');
     expect(decoded['isFlutterProject'], isTrue);
+    final architecture = decoded['architecture'] as Map<String, Object?>;
+    final counts = architecture['symbolCounts'] as Map<String, Object?>;
+    expect(counts['repository'], 1);
+    expect(counts['controller'], 1);
+    expect(counts['provider'], 1);
+    expect(architecture['routes'], hasLength(1));
   });
 
   test('init creates the Flower workspace', () async {
@@ -138,6 +159,52 @@ void main() {
     expect(result, 2);
     expect(output.toString(), isEmpty);
     expect(errors.toString(), contains('Choose either --json or --mermaid'));
+  });
+
+  test('symbols writes a filtered JSON index', () async {
+    final output = StringBuffer();
+    final errors = StringBuffer();
+
+    final result = await FlowerCli().run(
+      <String>[
+        'symbols',
+        project.path,
+        '--kind',
+        'repository',
+        '--feature',
+        'home',
+        '--json',
+      ],
+      out: output,
+      err: errors,
+    );
+
+    expect(result, 0);
+    expect(errors.toString(), isEmpty);
+    final decoded = jsonDecode(output.toString()) as Map<String, Object?>;
+    expect(decoded['schemaVersion'], '1.0.0');
+    expect(decoded['symbols'], hasLength(1));
+    final symbols = decoded['symbols'] as List<Object?>;
+    final symbol = symbols.single as Map<String, Object?>;
+    expect(symbol['name'], 'HomeRepository');
+    expect(symbol['kind'], 'repository');
+  });
+
+  test('symbols writes human-readable routes and roles', () async {
+    final output = StringBuffer();
+    final errors = StringBuffer();
+
+    final result = await FlowerCli().run(
+      <String>['symbols', project.path],
+      out: output,
+      err: errors,
+    );
+
+    expect(result, 0);
+    expect(errors.toString(), isEmpty);
+    expect(output.toString(), contains('HomeController'));
+    expect(output.toString(), contains('homeProvider'));
+    expect(output.toString(), contains('/home'));
   });
 
   test('version prints the current CLI version', () async {

@@ -32,9 +32,9 @@ Target: inspect an existing Flutter project and create Flower's project-local wo
 - [x] Detect feature directories under common feature-first layouts.
 - [x] Provide human-readable output.
 - [x] Provide stable JSON output for agents and scripts.
-- [ ] Replace file-pattern inspection with analyzer-backed symbol indexing where useful.
-- [ ] Detect routes and route names.
-- [ ] Detect repositories, services, providers, controllers, and data sources.
+- [x] Replace file-pattern inspection with analyzer-backed symbol indexing where useful.
+- [x] Detect routes and route names for supported router constructors.
+- [x] Detect repositories, services, providers, controllers, and data sources.
 - [ ] Detect monorepos and nested Flutter packages.
 
 ### 1.2 Project initialization
@@ -55,6 +55,17 @@ Target: inspect an existing Flutter project and create Flower's project-local wo
 - [x] Detect dependency cycles.
 - [x] Add `flower map` and feature-scoped map output.
 - [ ] Cache maps and invalidate only affected files.
+
+### 1.4 Symbol index
+
+- [x] Define a stable architecture-symbol JSON schema.
+- [x] Detect class roles from names and supertypes.
+- [x] Detect top-level provider declarations and `@riverpod` functions.
+- [x] Extract supported route constructors and metadata.
+- [x] Add `flower symbols` with kind and feature filtering.
+- [x] Include architecture summaries in inspection and initialized context.
+- [ ] Add configurable role aliases for project-specific naming conventions.
+- [ ] Add symbol references and declaration-to-file dependency links.
 
 ## Phase 2 — Context Engine
 
@@ -166,7 +177,19 @@ Target: add high-value workflows after the intelligence layer is reliable.
 
 - Analyzer-backed project map
 - `flower map`
+
+### `0.2.0-dev.2`
+
+- Analyzer-backed architecture symbol index
+- Route and architecture-role detection
+- `flower symbols`
+- Enriched inspection and initialized project context
+
+### `0.2.0-dev.3`
+
 - Agent instruction adapters
+- Monorepo and nested package detection
+- Project map caching
 
 ### `0.3.0-dev.1`
 

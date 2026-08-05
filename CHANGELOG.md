@@ -16,6 +16,17 @@ The project follows Semantic Versioning once a stable public API is published.
 - Generated-file and feature-first metadata.
 - Strongly connected dependency-cycle detection.
 - `flower map` with human-readable, JSON, Mermaid, and feature-scoped output.
+- Analyzer-backed architecture symbol indexing.
+- Repository, service, provider, controller, data-source, and DAO detection.
+- GoRouter, AutoRoute, and GetX route extraction.
+- `flower symbols` with role and feature filtering.
+- Architecture summaries in `flower inspect`, `flower init`, and generated project context.
+- Versioned symbol-index JSON output.
+
+### Changed
+
+- Project snapshot JSON schema advanced to version 2 to include architecture data.
+- Development package versions advanced to `0.2.0-dev.2`.
 
 ## 0.1.0-dev.1
 
