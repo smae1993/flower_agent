@@ -69,14 +69,11 @@ class OrderPage {}
       final report = await ArchitectureGuard().inspect(project.path);
 
       expect(report.packageName, 'guard_sample');
-      expect(
-        report.enabledRules,
-        <String>[
-          'dependency_cycle',
-          'layer_dependency',
-          'domain_flutter_dependency',
-        ],
-      );
+      expect(report.enabledRules, <String>[
+        'dependency_cycle',
+        'layer_dependency',
+        'domain_flutter_dependency',
+      ]);
       expect(
         report.violations.map((violation) => violation.ruleId),
         containsAll(<String>[

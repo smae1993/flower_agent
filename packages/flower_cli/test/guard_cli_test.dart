@@ -73,30 +73,31 @@ class Order {}
 
     expect(result, 3);
     expect(errors.toString(), isEmpty);
-    expect(
-      output.toString(),
-      startsWith('Flower Agent architecture guard'),
-    );
+    expect(output.toString(), startsWith('Flower Agent architecture guard'));
     expect(output.toString(), contains('domain_flutter_dependency'));
     expect(output.toString(), contains('Result: failed'));
   });
 
   test('fail-on controls the CI exit threshold', () async {
     final cli = FlowerCli(
-      guard: ArchitectureGuard(
-        rules: const <ArchitectureRule>[_WarningRule()],
-      ),
+      guard: ArchitectureGuard(rules: const <ArchitectureRule>[_WarningRule()]),
     );
 
     final errorThresholdOutput = StringBuffer();
-    final errorThreshold = await cli.run(
-      <String>['guard', '--path', project.path, '--fail-on', 'error'],
-      out: errorThresholdOutput,
-    );
-    final warningThreshold = await cli.run(
-      <String>['guard', '--path', project.path, '--fail-on', 'warning'],
-      out: StringBuffer(),
-    );
+    final errorThreshold = await cli.run(<String>[
+      'guard',
+      '--path',
+      project.path,
+      '--fail-on',
+      'error',
+    ], out: errorThresholdOutput);
+    final warningThreshold = await cli.run(<String>[
+      'guard',
+      '--path',
+      project.path,
+      '--fail-on',
+      'warning',
+    ], out: StringBuffer());
 
     expect(errorThreshold, 0);
     expect(errorThresholdOutput.toString(), contains('passed with findings'));

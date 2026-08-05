@@ -215,7 +215,9 @@ final class FlowerCli {
   }
 
   Future<int> _runGuard(ArgResults command, StringSink output) async {
-    final report = await _architectureGuard.inspect(_resolveProjectPath(command));
+    final report = await _architectureGuard.inspect(
+      _resolveProjectPath(command),
+    );
     final failOn = _guardSeverityByName(command['fail-on'] as String);
 
     if (command['json'] as bool) {
