@@ -207,6 +207,68 @@ class HomePage {}
     expect(output.toString(), contains('/home'));
   });
 
+  test('context writes a limited JSON task context', () async {
+    final output = StringBuffer();
+    final errors = StringBuffer();
+
+    final result = await FlowerCli().run(
+      <String>[
+        'context',
+        '--path',
+        project.path,
+        '--limit',
+        '1',
+        '--json',
+        'home',
+        'repository',
+      ],
+      out: output,
+      err: errors,
+    );
+
+    expect(result, 0);
+    expect(errors.toString(), isEmpty);
+    final decoded = jsonDecode(output.toString()) as Map<String, Object?>;
+    expect(decoded['schemaVersion'], '1.0.0');
+    expect(decoded['task'], 'home repository');
+    expect(decoded['files'], hasLength(1));
+    final files = decoded['files'] as List<Object?>;
+    final file = files.single as Map<String, Object?>;
+    expect(file['path'], endsWith('home_page.dart'));
+  });
+
+  test('context writes Markdown with selection reasons', () async {
+    final output = StringBuffer();
+    final errors = StringBuffer();
+
+    final result = await FlowerCli().run(
+      <String>['context', '--path', project.path, 'home', 'route'],
+      out: output,
+      err: errors,
+    );
+
+    expect(result, 0);
+    expect(errors.toString(), isEmpty);
+    expect(output.toString(), startsWith('# Flower Task Context'));
+    expect(output.toString(), contains('home_page.dart'));
+    expect(output.toString(), contains('Relevant routes'));
+  });
+
+  test('context requires a task description', () async {
+    final output = StringBuffer();
+    final errors = StringBuffer();
+
+    final result = await FlowerCli().run(
+      <String>['context', '--path', project.path],
+      out: output,
+      err: errors,
+    );
+
+    expect(result, 2);
+    expect(output.toString(), isEmpty);
+    expect(errors.toString(), contains('Provide a task'));
+  });
+
   test('version prints the current CLI version', () async {
     final output = StringBuffer();
 
