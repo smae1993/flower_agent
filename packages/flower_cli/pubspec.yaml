@@ -1,6 +1,6 @@
 name: flower_agent
 description: Local-first project intelligence and architecture governance for Flutter coding agents.
-version: 0.3.0-dev.1
+version: 0.4.0-dev.1
 repository: https://github.com/smae1993/flower_agent
 issue_tracker: https://github.com/smae1993/flower_agent/issues
 resolution: workspace
@@ -13,7 +13,7 @@ executables:
 
 dependencies:
   args: ^2.7.0
-  flower_core: ^0.3.0-dev.1
+  flower_core: ^0.4.0-dev.1
 
 dev_dependencies:
   lints: ^6.1.0

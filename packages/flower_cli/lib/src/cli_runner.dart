@@ -12,20 +12,23 @@ final class FlowerCli {
     ProjectMapper? mapper,
     ProjectSymbolIndexer symbolIndexer = const ProjectSymbolIndexer(),
     ProjectContextEngine? contextEngine,
+    ArchitectureGuard? guard,
   }) : _inspector = inspector,
        _initializer = initializer ?? ProjectInitializer(inspector: inspector),
        _mapper = mapper ?? ProjectMapper(inspector: inspector),
        _architectureIndexer = symbolIndexer,
        _taskContextEngine = contextEngine ?? ProjectContextEngine(),
+       _architectureGuard = guard ?? ArchitectureGuard(),
        _parser = _buildParser();
 
-  static const String version = '0.3.0-dev.1';
+  static const String version = '0.4.0-dev.1';
 
   final ProjectInspector _inspector;
   final ProjectInitializer _initializer;
   final ProjectMapper _mapper;
   final ProjectSymbolIndexer _architectureIndexer;
   final ProjectContextEngine _taskContextEngine;
+  final ArchitectureGuard _architectureGuard;
   final ArgParser _parser;
 
   Future<int> run(
@@ -69,6 +72,7 @@ final class FlowerCli {
         'map' => await _runMap(command, output),
         'symbols' => await _runSymbols(command, output),
         'context' => await _runContext(command, output),
+        'guard' => await _runGuard(command, output),
         _ => _unknownCommand(command.name, errorOutput),
       };
     } on FlowerException catch (error) {
@@ -208,6 +212,23 @@ final class FlowerCli {
       output.write(context.toMarkdown());
     }
     return 0;
+  }
+
+  Future<int> _runGuard(ArgResults command, StringSink output) async {
+    final report = await _architectureGuard.inspect(
+      _resolveProjectPath(command),
+    );
+    final failOn = _guardSeverityByName(command['fail-on'] as String);
+
+    if (command['json'] as bool) {
+      output.writeln(
+        const JsonEncoder.withIndent('  ').convert(report.toJson()),
+      );
+    } else {
+      _writeGuardReport(output, report, failOn: failOn);
+    }
+
+    return report.hasViolationsAtOrAbove(failOn) ? 3 : 0;
   }
 
   void _writeSnapshot(StringSink output, ProjectSnapshot snapshot) {
@@ -372,6 +393,53 @@ final class FlowerCli {
     }
   }
 
+  void _writeGuardReport(
+    StringSink output,
+    GuardReport report, {
+    required GuardSeverity failOn,
+  }) {
+    output
+      ..writeln('Flower Agent architecture guard')
+      ..writeln('Project: ${report.packageName}')
+      ..writeln('Root: ${report.rootPath}')
+      ..writeln('Fail on: ${failOn.name}')
+      ..writeln('Rules: ${report.enabledRules.join(', ')}')
+      ..writeln()
+      ..writeln('Summary');
+
+    for (final entry in report.counts.entries) {
+      output.writeln('  ${entry.key.name}: ${entry.value}');
+    }
+
+    if (report.violations.isEmpty) {
+      output
+        ..writeln()
+        ..writeln('Result: passed');
+      return;
+    }
+
+    output
+      ..writeln()
+      ..writeln('Violations');
+    for (final violation in report.violations) {
+      output.writeln(
+        '  [${violation.severity.name}] ${violation.ruleId}: '
+        '${violation.path}',
+      );
+      if (violation.targetPath != null) {
+        output.writeln('    Target: ${violation.targetPath}');
+      }
+      output
+        ..writeln('    ${violation.message}')
+        ..writeln('    Fix: ${violation.suggestion}');
+    }
+
+    final failed = report.hasViolationsAtOrAbove(failOn);
+    output
+      ..writeln()
+      ..writeln('Result: ${failed ? 'failed' : 'passed with findings'}');
+  }
+
   ProjectSymbolKind _symbolKindByName(String name) {
     for (final kind in ProjectSymbolKind.values) {
       if (kind.name == name) {
@@ -379,6 +447,15 @@ final class FlowerCli {
       }
     }
     throw FlowerException('Unsupported symbol kind: $name');
+  }
+
+  GuardSeverity _guardSeverityByName(String name) {
+    for (final severity in GuardSeverity.values) {
+      if (severity.name == name) {
+        return severity;
+      }
+    }
+    throw FlowerException('Unsupported guard severity: $name');
   }
 
   String _resolveProjectPath(ArgResults command) {
@@ -408,7 +485,8 @@ final class FlowerCli {
       ..writeln('  flower map --mermaid')
       ..writeln('  flower map --feature invoices --json')
       ..writeln('  flower symbols --kind repository --json')
-      ..writeln('  flower context "add invoice filtering" --limit 8');
+      ..writeln('  flower context "add invoice filtering" --limit 8')
+      ..writeln('  flower guard --fail-on error --json');
   }
 
   void _writeCommandUsage(StringSink output, String commandName) {
@@ -513,6 +591,26 @@ final class FlowerCli {
       )
       ..addFlag('help', abbr: 'h', negatable: false);
 
+    final guardParser = ArgParser()
+      ..addOption(
+        'path',
+        abbr: 'p',
+        defaultsTo: '.',
+        help: 'Path to the Dart or Flutter project root.',
+      )
+      ..addOption(
+        'fail-on',
+        defaultsTo: 'error',
+        allowed: GuardSeverity.values.map((severity) => severity.name),
+        help: 'Return exit code 3 at or above this severity.',
+      )
+      ..addFlag(
+        'json',
+        negatable: false,
+        help: 'Write the stable machine-readable guard report.',
+      )
+      ..addFlag('help', abbr: 'h', negatable: false);
+
     return ArgParser()
       ..addFlag('help', abbr: 'h', negatable: false)
       ..addFlag('version', negatable: false)
@@ -520,6 +618,7 @@ final class FlowerCli {
       ..addCommand('init', initParser)
       ..addCommand('map', mapParser)
       ..addCommand('symbols', symbolsParser)
-      ..addCommand('context', contextParser);
+      ..addCommand('context', contextParser)
+      ..addCommand('guard', guardParser);
   }
 }

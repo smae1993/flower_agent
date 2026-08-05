@@ -30,7 +30,7 @@ The repository is in active early development. The current vertical slice provid
 - `flower map` — build an analyzer-backed internal dependency graph, find cycles, and export JSON or Mermaid;
 - `flower symbols` — index repositories, services, providers, controllers, data sources, and routes;
 - `flower context` — select a compact task-specific set of files with deterministic scores and reasons;
-- feature-scoped project maps and symbol indexes for focused agent context;
+- `flower guard` — validate dependency cycles, clean-layer direction, and Flutter dependencies inside domain code;
 - deterministic, local-only analysis with no API key or cloud service.
 
 ## Quick start
@@ -82,7 +82,15 @@ flower context "add invoice filtering" --json
 flower context "تخفیف فاکتور را اضافه کن" --json
 ```
 
-The default context output is Markdown so it can be passed directly to a coding agent. JSON output is intended for MCP adapters, scripts, and future IDE integrations.
+Validate project architecture:
+
+```bash
+flower guard
+flower guard --json
+flower guard --fail-on warning
+```
+
+`flower guard` returns exit code `0` when no finding reaches the configured threshold and exit code `3` when it should fail CI. The default threshold is `error`; accepted values are `info`, `warning`, and `error`.
 
 ## How context selection works
 
@@ -97,6 +105,18 @@ Flower does not send the task or source code to an LLM. It deterministically ran
 Every selected file includes a numeric score and human-readable reasons. The `--limit` option controls the maximum number of files returned and accepts values from 1 to 50.
 
 The tokenizer supports English identifiers, camelCase and snake_case names, Persian task text, and a small built-in set of common Persian-to-English project aliases. Project-defined aliases are planned for a later milestone.
+
+## Architecture Guard
+
+The first built-in rules intentionally target high-confidence architecture failures:
+
+- `dependency_cycle` — reports strongly connected internal dependency components;
+- `layer_dependency` — enforces the default direction `presentation → application → domain` and `data → domain` when recognized layer directories are present;
+- `domain_flutter_dependency` — reports `flutter` and `flutter_*` package imports from files inside a `domain` layer.
+
+Every violation contains a stable rule ID, severity, source path, optional target path, message, and suggested fix. Reports are available in human-readable and versioned JSON formats.
+
+The core package exposes the public `ArchitectureRule` interface, so integrations can construct an `ArchitectureGuard` with their own deterministic rules. Project configuration and suppression files are planned for later milestones.
 
 ## Supported project intelligence
 
@@ -162,6 +182,27 @@ Task context JSON includes the normalized query, selected files, scores, reasons
 }
 ```
 
+Guard reports are versioned and CI-friendly:
+
+```json
+{
+  "schemaVersion": "1.0.0",
+  "packageName": "example_app",
+  "enabledRules": [
+    "dependency_cycle",
+    "layer_dependency",
+    "domain_flutter_dependency"
+  ],
+  "counts": {
+    "info": 0,
+    "warning": 0,
+    "error": 0
+  },
+  "passed": true,
+  "violations": []
+}
+```
+
 Mermaid output can be pasted directly into GitHub Markdown or Mermaid-compatible documentation:
 
 ```bash
@@ -189,7 +230,7 @@ See [ROADMAP.md](ROADMAP.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ```text
 packages/
-├── flower_core/    # Project models, inspection, maps, symbols, context, and initialization
+├── flower_core/    # Inspection, maps, symbols, context, guard rules, and initialization
 └── flower_cli/     # The `flower` command-line application
 
 docs/               # Product and architecture documentation

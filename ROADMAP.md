@@ -92,22 +92,33 @@ Exit criteria:
 
 Target: reject changes that violate project-specific rules.
 
-- [ ] Define rule configuration and violation schemas.
-- [ ] Enforce allowed and forbidden layer imports.
-- [ ] Detect Flutter dependencies inside pure domain layers.
+- [x] Define stable rule and violation schemas.
+- [x] Enforce the default allowed and forbidden clean-layer import directions.
+- [x] Detect Flutter dependencies inside pure domain layers.
 - [ ] Detect business logic placed in widgets.
 - [ ] Detect raw colors, spacing, and typography outside configured design tokens.
 - [ ] Add RTL-aware rules for directional padding and alignment.
 - [ ] Detect missing tests for configured change categories.
-- [ ] Add `flower guard` with human, JSON, and CI output.
+- [x] Add `flower guard` with human, JSON, and CI output.
+- [x] Add configurable CI failure thresholds by severity.
 - [ ] Support rule suppression with explicit justification.
-- [ ] Provide a plugin API for third-party rules.
+- [x] Provide a public API for custom third-party rules.
 
 Exit criteria:
 
-- Rules are deterministic and independently testable.
-- CI can fail on configurable severity levels.
-- Suppressions are visible and auditable.
+- [x] Rules are deterministic and independently testable.
+- [x] CI can fail on configurable severity levels.
+- [ ] Suppressions are visible and auditable.
+
+### 3.1 Guard MVP rules
+
+- [x] Detect strongly connected internal dependency cycles.
+- [x] Detect `domain → data/application/presentation` dependencies.
+- [x] Detect `data → application/presentation` dependencies.
+- [x] Detect `application → presentation` dependencies.
+- [x] Detect `flutter` and `flutter_*` package imports from domain files.
+- [ ] Load enabled rules and severity overrides from `.flower/flower.yaml`.
+- [ ] Add project-local rule suppressions with required reasons.
 
 ## Phase 4 — Decision Memory
 
@@ -209,8 +220,16 @@ Target: add high-value workflows after the intelligence layer is reliable.
 
 ### `0.4.0-dev.1`
 
-- Rule engine
-- `flower guard`
+- Architecture rule API and versioned violation reports
+- Dependency-cycle and clean-layer direction rules
+- Flutter-in-domain rule
+- `flower guard` with JSON, human, and CI behavior
+
+### `0.4.0-dev.2`
+
+- Guard configuration and severity overrides
+- Auditable suppressions
+- UI and RTL rules
 
 ### `0.5.0-beta.1`
 
