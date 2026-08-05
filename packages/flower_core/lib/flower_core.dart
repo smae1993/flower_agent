@@ -1,6 +1,8 @@
 library;
 
+export 'src/architecture_guard.dart';
 export 'src/flower_exception.dart';
+export 'src/guard_report.dart';
 export 'src/project_context.dart';
 export 'src/project_context_engine.dart';
 export 'src/project_initializer.dart';
