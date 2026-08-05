@@ -68,71 +68,64 @@ class InvoiceController {}
     }
   });
 
-  test('maps imports, exports, parts, packages, features, and cycles', () async {
-    final projectMap = await const ProjectMapper().build(project.path);
+  test(
+    'maps imports, exports, parts, packages, features, and cycles',
+    () async {
+      final projectMap = await const ProjectMapper().build(project.path);
 
-    expect(projectMap.packageName, 'sample_app');
-    expect(projectMap.nodes, hasLength(5));
-    expect(projectMap.edges, hasLength(4));
-    expect(projectMap.features, <String>{'customers', 'invoices'});
+      expect(projectMap.packageName, 'sample_app');
+      expect(projectMap.nodes, hasLength(5));
+      expect(projectMap.edges, hasLength(4));
+      expect(projectMap.features, <String>{'customers', 'invoices'});
 
-    final generatedNode = projectMap.nodes.singleWhere(
-      (node) => node.path.endsWith('invoice_controller.g.dart'),
-    );
-    expect(generatedNode.generated, isTrue);
-    expect(generatedNode.feature, 'invoices');
+      final generatedNode = projectMap.nodes.singleWhere(
+        (node) => node.path.endsWith('invoice_controller.g.dart'),
+      );
+      expect(generatedNode.generated, isTrue);
+      expect(generatedNode.feature, 'invoices');
 
-    final invoicePage = projectMap.nodes.singleWhere(
-      (node) => node.path.endsWith('invoice_page.dart'),
-    );
-    expect(invoicePage.externalPackages, <String>['flutter']);
+      final invoicePage = projectMap.nodes.singleWhere(
+        (node) => node.path.endsWith('invoice_page.dart'),
+      );
+      expect(invoicePage.externalPackages, <String>['flutter']);
 
-    final customer = projectMap.nodes.singleWhere(
-      (node) => node.path.endsWith('customer.dart'),
-    );
-    expect(customer.externalPackages, <String>['collection']);
+      final customer = projectMap.nodes.singleWhere(
+        (node) => node.path.endsWith('customer.dart'),
+      );
+      expect(customer.externalPackages, <String>['collection']);
 
-    expect(
-      projectMap.edges,
-      contains(
-        isA<ProjectMapEdge>()
-            .having(
-              (edge) => edge.source,
-              'source',
-              'lib/features/invoices/presentation/invoice_page.dart',
-            )
-            .having(
-              (edge) => edge.target,
-              'target',
-              'lib/features/invoices/application/invoice_controller.dart',
-            )
-            .having(
-              (edge) => edge.kind,
-              'kind',
-              ProjectMapEdgeKind.import,
-            ),
-      ),
-    );
+      expect(
+        projectMap.edges,
+        contains(
+          isA<ProjectMapEdge>()
+              .having(
+                (edge) => edge.source,
+                'source',
+                'lib/features/invoices/presentation/invoice_page.dart',
+              )
+              .having(
+                (edge) => edge.target,
+                'target',
+                'lib/features/invoices/application/invoice_controller.dart',
+              )
+              .having((edge) => edge.kind, 'kind', ProjectMapEdgeKind.import),
+        ),
+      );
 
-    expect(projectMap.cycles, hasLength(1));
-    expect(
-      projectMap.cycles.single,
-      <String>[
+      expect(projectMap.cycles, hasLength(1));
+      expect(projectMap.cycles.single, <String>[
         'lib/features/invoices/application/invoice_controller.dart',
         'lib/features/invoices/presentation/invoice_page.dart',
-      ],
-    );
-  });
+      ]);
+    },
+  );
 
   test('creates feature-scoped JSON and Mermaid output', () async {
     final projectMap = await const ProjectMapper().build(project.path);
     final invoices = projectMap.forFeature('invoices');
 
     expect(invoices.nodes, hasLength(4));
-    expect(
-      invoices.nodes.every((node) => node.feature == 'invoices'),
-      isTrue,
-    );
+    expect(invoices.nodes.every((node) => node.feature == 'invoices'), isTrue);
     expect(invoices.toJson()['schemaVersion'], ProjectMap.schemaVersion);
 
     final mermaid = invoices.toMermaid();
