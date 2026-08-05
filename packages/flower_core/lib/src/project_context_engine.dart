@@ -167,10 +167,7 @@ final class ProjectContextEngine {
                 ..sort(),
         ),
     ];
-    final matchedFeatures = <String>{
-      for (final file in files)
-        if (file.feature != null) file.feature!,
-    }.toList()..sort();
+    final matchedFeatures = _matchedFeatureNames(projectMap, queryTerms);
     final relevantRoutes = symbolIndex.routes
         .where((route) => selectedPaths.contains(route.sourcePath))
         .toList(growable: false);
@@ -209,6 +206,17 @@ final class ProjectContextEngine {
       }
     }
     return terms.toList(growable: false);
+  }
+
+  List<String> _matchedFeatureNames(
+    ProjectMap projectMap,
+    List<String> queryTerms,
+  ) {
+    final matched = projectMap.features.where((feature) {
+      final featureTerms = _tokenize(feature).map(_singularize).toSet();
+      return queryTerms.any(featureTerms.contains);
+    }).toList()..sort();
+    return matched;
   }
 
   void _scorePath(_ContextCandidate candidate, List<String> queryTerms) {
