@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'flower_exception.dart';
 import 'project_context.dart';
 import 'project_map.dart';
@@ -198,7 +196,7 @@ final class ProjectContextEngine {
   }
 
   List<String> _queryTerms(String task) {
-    final terms = LinkedHashSet<String>();
+    final terms = <String>{};
     for (final rawTerm in _tokenize(task)) {
       final term = _singularize(rawTerm);
       if (term.length < 2 || _stopWords.contains(term)) {
@@ -430,6 +428,6 @@ final class _ContextCandidate {
   _ContextCandidate({required this.node});
 
   final ProjectMapNode node;
-  final LinkedHashSet<String> reasons = LinkedHashSet<String>();
+  final Set<String> reasons = <String>{};
   int score = 0;
 }
