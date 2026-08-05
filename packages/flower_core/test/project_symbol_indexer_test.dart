@@ -35,8 +35,6 @@ class InvoiceDao {}
       project,
       'lib/features/invoices/application/invoice_controller.dart',
       '''
-class StateNotifier<T> {}
-
 class InvoiceController extends StateNotifier<int> {}
 
 final invoiceProvider = Provider((ref) => InvoiceController());
