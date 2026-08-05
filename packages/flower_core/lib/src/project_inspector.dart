@@ -22,12 +22,7 @@ final class ProjectInspector {
           'get',
           'signals',
         ],
-        'routing': <String>[
-          'go_router',
-          'auto_route',
-          'beamer',
-          'routemaster',
-        ],
+        'routing': <String>['go_router', 'auto_route', 'beamer', 'routemaster'],
         'networking': <String>['dio', 'http', 'retrofit', 'chopper'],
         'database': <String>[
           'drift',
@@ -37,11 +32,7 @@ final class ProjectInspector {
           'objectbox',
           'sqflite',
         ],
-        'dependency_injection': <String>[
-          'get_it',
-          'injectable',
-          'kiwi',
-        ],
+        'dependency_injection': <String>['get_it', 'injectable', 'kiwi'],
         'code_generation': <String>[
           'freezed',
           'json_serializable',
@@ -85,7 +76,8 @@ final class ProjectInspector {
       );
     }
 
-    final packageName = _asNonEmptyString(pubspec['name']) ?? p.basename(root.path);
+    final packageName =
+        _asNonEmptyString(pubspec['name']) ?? p.basename(root.path);
     final description = _asNonEmptyString(pubspec['description']) ?? '';
     final dependencyNames = _readDependencyNames(pubspec);
     final isFlutterProject =
