@@ -49,11 +49,11 @@ Target: inspect an existing Flutter project and create Flower's project-local wo
 
 ### 1.3 Project map
 
-- [ ] Define stable project-map JSON schema.
-- [ ] Build import and package dependency graphs.
-- [ ] Export Mermaid diagrams.
-- [ ] Detect dependency cycles.
-- [ ] Add `flower map` and feature-scoped map output.
+- [x] Define stable project-map JSON schema.
+- [x] Build import and package dependency graphs.
+- [x] Export Mermaid diagrams.
+- [x] Detect dependency cycles.
+- [x] Add `flower map` and feature-scoped map output.
 - [ ] Cache maps and invalidate only affected files.
 
 ## Phase 2 — Context Engine

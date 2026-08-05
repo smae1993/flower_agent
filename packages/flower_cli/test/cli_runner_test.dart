@@ -19,10 +19,26 @@ dependencies:
 flutter:
   uses-material-design: true
 ''');
-    await Directory(p.join(project.path, 'lib')).create();
+    await Directory(
+      p.join(project.path, 'lib', 'features', 'home', 'presentation'),
+    ).create(recursive: true);
+    await File(p.join(project.path, 'lib', 'main.dart')).writeAsString('''
+import 'package:cli_sample/features/home/presentation/home_page.dart';
+
+void main() {
+  HomePage();
+}
+''');
     await File(
-      p.join(project.path, 'lib', 'main.dart'),
-    ).writeAsString('void main() {}');
+      p.join(
+        project.path,
+        'lib',
+        'features',
+        'home',
+        'presentation',
+        'home_page.dart',
+      ),
+    ).writeAsString('class HomePage {}');
   });
 
   tearDown(() async {
@@ -71,6 +87,57 @@ flutter:
       isTrue,
     );
     expect(await File(p.join(project.path, 'AGENTS.md')).exists(), isTrue);
+  });
+
+  test('map writes a JSON dependency graph', () async {
+    final output = StringBuffer();
+    final errors = StringBuffer();
+
+    final result = await FlowerCli().run(
+      <String>['map', '--path', project.path, '--json'],
+      out: output,
+      err: errors,
+    );
+
+    expect(result, 0);
+    expect(errors.toString(), isEmpty);
+    final decoded = jsonDecode(output.toString()) as Map<String, Object?>;
+    expect(decoded['schemaVersion'], '1.0.0');
+    expect(decoded['packageName'], 'cli_sample');
+    expect(decoded['nodes'], hasLength(2));
+    expect(decoded['edges'], hasLength(1));
+  });
+
+  test('map writes a feature-scoped Mermaid graph', () async {
+    final output = StringBuffer();
+    final errors = StringBuffer();
+
+    final result = await FlowerCli().run(
+      <String>['map', project.path, '--feature', 'home', '--mermaid'],
+      out: output,
+      err: errors,
+    );
+
+    expect(result, 0);
+    expect(errors.toString(), isEmpty);
+    expect(output.toString(), startsWith('flowchart LR'));
+    expect(output.toString(), contains('home_page.dart'));
+    expect(output.toString(), isNot(contains('main.dart')));
+  });
+
+  test('map rejects multiple output formats', () async {
+    final output = StringBuffer();
+    final errors = StringBuffer();
+
+    final result = await FlowerCli().run(
+      <String>['map', project.path, '--json', '--mermaid'],
+      out: output,
+      err: errors,
+    );
+
+    expect(result, 2);
+    expect(output.toString(), isEmpty);
+    expect(errors.toString(), contains('Choose either --json or --mermaid'));
   });
 
   test('version prints the current CLI version', () async {

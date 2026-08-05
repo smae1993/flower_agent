@@ -23,11 +23,12 @@ Flower turns a Flutter repository into structured project intelligence that agen
 
 ## Current milestone
 
-The repository is in active early development. The first vertical slice provides:
+The repository is in active early development. The current vertical slice provides:
 
 - `flower inspect` — detect Flutter technologies, feature folders, source files, generated files, and tests;
 - `flower init` — create a project-local `.flower` workspace and agent bootstrap instructions;
-- human-readable and JSON output suitable for both developers and AI tools;
+- `flower map` — build an analyzer-backed internal dependency graph, find cycles, and export JSON or Mermaid;
+- feature-scoped project maps for focused agent context;
 - deterministic, local-only analysis with no API key or cloud service.
 
 ## Quick start
@@ -52,7 +53,38 @@ cd /path/to/flutter/project
 flower init
 ```
 
+Build the project dependency map:
+
+```bash
+flower map
+flower map --json
+flower map --mermaid
+flower map --feature invoices --json
+```
+
+`flower map` parses Dart directives with the Dart analyzer. It resolves same-package imports, exports, and parts, reports external packages per file, marks generated files, detects feature-first paths, and identifies strongly connected dependency cycles.
+
 The initialization command creates files only when they do not already exist. It does not overwrite an existing `AGENTS.md` or Flower configuration.
+
+## Project map formats
+
+Human-readable output provides a compact graph summary and cycle report. JSON output uses a versioned schema intended for agents and scripts:
+
+```json
+{
+  "schemaVersion": "1.0.0",
+  "packageName": "example_app",
+  "nodes": [],
+  "edges": [],
+  "cycles": []
+}
+```
+
+Mermaid output can be pasted directly into GitHub Markdown or Mermaid-compatible documentation:
+
+```bash
+flower map --mermaid > architecture.mmd
+```
 
 ## Product direction
 
@@ -75,7 +107,7 @@ See [ROADMAP.md](ROADMAP.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ```text
 packages/
-├── flower_core/    # Project models, inspection and initialization
+├── flower_core/    # Project models, inspection, maps, and initialization
 └── flower_cli/     # The `flower` command-line application
 
 docs/               # Product and architecture documentation
