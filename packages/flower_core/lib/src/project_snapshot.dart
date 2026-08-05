@@ -1,3 +1,5 @@
+import 'project_symbol_index.dart';
+
 /// A deterministic snapshot of an inspected Dart or Flutter project.
 final class ProjectSnapshot {
   ProjectSnapshot({
@@ -12,16 +14,20 @@ final class ProjectSnapshot {
     required Iterable<String> featureNames,
     required Map<String, List<String>> technologies,
     required Iterable<String> warnings,
+    Map<String, int> symbolCounts = const <String, int>{},
+    Iterable<ProjectRoute> routes = const <ProjectRoute>[],
   }) : featureNames = List.unmodifiable(featureNames),
        technologies = Map.unmodifiable(
          technologies.map(
            (key, value) => MapEntry(key, List<String>.unmodifiable(value)),
          ),
        ),
-       warnings = List.unmodifiable(warnings);
+       warnings = List.unmodifiable(warnings),
+       symbolCounts = Map.unmodifiable(symbolCounts),
+       routes = List.unmodifiable(routes);
 
   /// The current JSON contract version.
-  static const int schemaVersion = 1;
+  static const int schemaVersion = 2;
 
   final String rootPath;
   final String packageName;
@@ -34,6 +40,8 @@ final class ProjectSnapshot {
   final List<String> featureNames;
   final Map<String, List<String>> technologies;
   final List<String> warnings;
+  final Map<String, int> symbolCounts;
+  final List<ProjectRoute> routes;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'schemaVersion': schemaVersion,
@@ -49,6 +57,10 @@ final class ProjectSnapshot {
     },
     'features': featureNames,
     'technologies': technologies,
+    'architecture': <String, Object?>{
+      'symbolCounts': symbolCounts,
+      'routes': routes.map((route) => route.toJson()).toList(growable: false),
+    },
     'warnings': warnings,
   };
 }
