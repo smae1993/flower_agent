@@ -22,11 +22,17 @@ The project follows Semantic Versioning once a stable public API is published.
 - `flower symbols` with role and feature filtering.
 - Architecture summaries in `flower inspect`, `flower init`, and generated project context.
 - Versioned symbol-index JSON output.
+- Deterministic task-specific context ranking from paths, features, symbols, routes, imports, and dependents.
+- `flower context` with Markdown and versioned JSON output.
+- Per-file context scores, selection reasons, architecture symbols, dependencies, and dependents.
+- Configurable file-count context limits.
+- Initial Persian task aliases for common project terminology.
+- Deterministic entry-point fallback when a task has no lexical match.
 
 ### Changed
 
 - Project snapshot JSON schema advanced to version 2 to include architecture data.
-- Development package versions advanced to `0.2.0-dev.2`.
+- Development package versions advanced to `0.3.0-dev.1`.
 
 ## 0.1.0-dev.1
 

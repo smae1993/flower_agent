@@ -11,18 +11,21 @@ final class FlowerCli {
     ProjectInitializer? initializer,
     ProjectMapper? mapper,
     ProjectSymbolIndexer symbolIndexer = const ProjectSymbolIndexer(),
+    ProjectContextEngine? contextEngine,
   }) : _inspector = inspector,
        _initializer = initializer ?? ProjectInitializer(inspector: inspector),
        _mapper = mapper ?? ProjectMapper(inspector: inspector),
        _architectureIndexer = symbolIndexer,
+       _taskContextEngine = contextEngine ?? ProjectContextEngine(),
        _parser = _buildParser();
 
-  static const String version = '0.2.0-dev.2';
+  static const String version = '0.3.0-dev.1';
 
   final ProjectInspector _inspector;
   final ProjectInitializer _initializer;
   final ProjectMapper _mapper;
   final ProjectSymbolIndexer _architectureIndexer;
+  final ProjectContextEngine _taskContextEngine;
   final ArgParser _parser;
 
   Future<int> run(
@@ -65,6 +68,7 @@ final class FlowerCli {
         'init' => await _runInit(command, output),
         'map' => await _runMap(command, output),
         'symbols' => await _runSymbols(command, output),
+        'context' => await _runContext(command, output),
         _ => _unknownCommand(command.name, errorOutput),
       };
     } on FlowerException catch (error) {
@@ -173,6 +177,35 @@ final class FlowerCli {
         requestedKind: requestedKind,
         requestedFeature: feature,
       );
+    }
+    return 0;
+  }
+
+  Future<int> _runContext(ArgResults command, StringSink output) async {
+    final task = command.rest.join(' ').trim();
+    if (task.isEmpty) {
+      throw const FlowerException(
+        'Provide a task after `flower context`, for example '
+        '`flower context "add invoice filtering"`.',
+      );
+    }
+
+    final limit = int.tryParse(command['limit'] as String);
+    if (limit == null) {
+      throw const FlowerException('Context limit must be an integer.');
+    }
+    final context = await _taskContextEngine.build(
+      command['path'] as String,
+      task,
+      limit: limit,
+    );
+
+    if (command['json'] as bool) {
+      output.writeln(
+        const JsonEncoder.withIndent('  ').convert(context.toJson()),
+      );
+    } else {
+      output.write(context.toMarkdown());
     }
     return 0;
   }
@@ -374,7 +407,8 @@ final class FlowerCli {
       ..writeln('  flower init')
       ..writeln('  flower map --mermaid')
       ..writeln('  flower map --feature invoices --json')
-      ..writeln('  flower symbols --kind repository --json');
+      ..writeln('  flower symbols --kind repository --json')
+      ..writeln('  flower context "add invoice filtering" --limit 8');
   }
 
   void _writeCommandUsage(StringSink output, String commandName) {
@@ -459,12 +493,33 @@ final class FlowerCli {
       )
       ..addFlag('help', abbr: 'h', negatable: false);
 
+    final contextParser = ArgParser()
+      ..addOption(
+        'path',
+        abbr: 'p',
+        defaultsTo: '.',
+        help: 'Path to the Dart or Flutter project root.',
+      )
+      ..addOption(
+        'limit',
+        abbr: 'l',
+        defaultsTo: '12',
+        help: 'Maximum number of relevant files to select (1-50).',
+      )
+      ..addFlag(
+        'json',
+        negatable: false,
+        help: 'Write the stable machine-readable task context.',
+      )
+      ..addFlag('help', abbr: 'h', negatable: false);
+
     return ArgParser()
       ..addFlag('help', abbr: 'h', negatable: false)
       ..addFlag('version', negatable: false)
       ..addCommand('inspect', inspectParser)
       ..addCommand('init', initParser)
       ..addCommand('map', mapParser)
-      ..addCommand('symbols', symbolsParser);
+      ..addCommand('symbols', symbolsParser)
+      ..addCommand('context', contextParser);
   }
 }

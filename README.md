@@ -29,6 +29,7 @@ The repository is in active early development. The current vertical slice provid
 - `flower init` — create a project-local `.flower` workspace and agent bootstrap instructions;
 - `flower map` — build an analyzer-backed internal dependency graph, find cycles, and export JSON or Mermaid;
 - `flower symbols` — index repositories, services, providers, controllers, data sources, and routes;
+- `flower context` — select a compact task-specific set of files with deterministic scores and reasons;
 - feature-scoped project maps and symbol indexes for focused agent context;
 - deterministic, local-only analysis with no API key or cloud service.
 
@@ -71,6 +72,33 @@ flower symbols --json
 flower symbols --kind repository --json
 flower symbols --feature invoices --json
 ```
+
+Generate task-specific context:
+
+```bash
+flower context "add invoice filtering"
+flower context "add invoice filtering" --limit 8
+flower context "add invoice filtering" --json
+flower context "تخفیف فاکتور را اضافه کن" --json
+```
+
+The default context output is Markdown so it can be passed directly to a coding agent. JSON output is intended for MCP adapters, scripts, and future IDE integrations.
+
+## How context selection works
+
+Flower does not send the task or source code to an LLM. It deterministically ranks project files using:
+
+- feature-name and file-path matches;
+- architecture symbols such as repositories, controllers, providers, and data sources;
+- route names, paths, and declarations;
+- direct imports and direct dependents from the project graph;
+- deterministic entry-point fallbacks when no lexical match is found.
+
+Every selected file includes a numeric score and human-readable reasons. The `--limit` option controls the maximum number of files returned and accepts values from 1 to 50.
+
+The tokenizer supports English identifiers, camelCase and snake_case names, Persian task text, and a small built-in set of common Persian-to-English project aliases. Project-defined aliases are planned for a later milestone.
+
+## Supported project intelligence
 
 Supported symbol roles currently include:
 
@@ -118,6 +146,22 @@ Symbol index JSON is also versioned:
 }
 ```
 
+Task context JSON includes the normalized query, selected files, scores, reasons, symbols, direct dependencies, direct dependents, relevant routes, and warnings:
+
+```json
+{
+  "schemaVersion": "1.0.0",
+  "task": "add invoice filtering",
+  "packageName": "example_app",
+  "limit": 12,
+  "queryTerms": ["invoice", "filtering"],
+  "matchedFeatures": ["invoices"],
+  "files": [],
+  "routes": [],
+  "warnings": []
+}
+```
+
 Mermaid output can be pasted directly into GitHub Markdown or Mermaid-compatible documentation:
 
 ```bash
@@ -145,7 +189,7 @@ See [ROADMAP.md](ROADMAP.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ```text
 packages/
-├── flower_core/    # Project models, inspection, maps, symbols, and initialization
+├── flower_core/    # Project models, inspection, maps, symbols, context, and initialization
 └── flower_cli/     # The `flower` command-line application
 
 docs/               # Product and architecture documentation
