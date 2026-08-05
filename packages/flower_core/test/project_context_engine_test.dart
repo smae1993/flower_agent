@@ -77,35 +77,38 @@ class InvoicePage {}
     }
   });
 
-  test('ranks feature, symbol, path, and graph matches deterministically', () async {
-    final context = await ProjectContextEngine().build(
-      project.path,
-      'add invoice repository discount support',
-      limit: 5,
-    );
+  test(
+    'ranks feature, symbol, path, and graph matches deterministically',
+    () async {
+      final context = await ProjectContextEngine().build(
+        project.path,
+        'add invoice repository discount support',
+        limit: 5,
+      );
 
-    expect(context.packageName, 'context_sample');
-    expect(context.queryTerms, containsAll(<String>['invoice', 'repository', 'discount', 'support']));
-    expect(context.matchedFeatures, <String>['invoices']);
-    expect(context.files, isNotEmpty);
-    expect(context.files.first.path, contains('invoice_repository.dart'));
-    expect(context.files.first.symbols.single.name, 'InvoiceRepository');
-    expect(
-      context.files.first.reasons,
-      contains(contains('repository')),
-    );
-    expect(
-      context.files.any((file) => file.path.endsWith('invoice.dart')),
-      isTrue,
-    );
-    expect(
-      context.files.map((file) => file.score),
-      orderedEquals(
-        context.files.map((file) => file.score).toList()
-          ..sort((left, right) => right.compareTo(left)),
-      ),
-    );
-  });
+      expect(context.packageName, 'context_sample');
+      expect(
+        context.queryTerms,
+        containsAll(<String>['invoice', 'repository', 'discount', 'support']),
+      );
+      expect(context.matchedFeatures, <String>['invoices']);
+      expect(context.files, isNotEmpty);
+      expect(context.files.first.path, contains('invoice_repository.dart'));
+      expect(context.files.first.symbols.single.name, 'InvoiceRepository');
+      expect(context.files.first.reasons, contains(contains('repository')));
+      expect(
+        context.files.any((file) => file.path.endsWith('invoice.dart')),
+        isTrue,
+      );
+      expect(
+        context.files.map((file) => file.score),
+        orderedEquals(
+          context.files.map((file) => file.score).toList()
+            ..sort((left, right) => right.compareTo(left)),
+        ),
+      );
+    },
+  );
 
   test('expands built-in Persian task aliases', () async {
     final context = await ProjectContextEngine().build(
@@ -118,23 +121,30 @@ class InvoicePage {}
     expect(context.matchedFeatures, <String>['invoices']);
     expect(
       context.files.every(
-        (file) => file.feature == 'invoices' || file.path == 'lib/app_router.dart',
+        (file) =>
+            file.feature == 'invoices' || file.path == 'lib/app_router.dart',
       ),
       isTrue,
     );
   });
 
-  test('selects deterministic entry points when no task term matches', () async {
-    final context = await ProjectContextEngine().build(
-      project.path,
-      'quantum zebra telemetry',
-      limit: 3,
-    );
+  test(
+    'selects deterministic entry points when no task term matches',
+    () async {
+      final context = await ProjectContextEngine().build(
+        project.path,
+        'quantum zebra telemetry',
+        limit: 3,
+      );
 
-    expect(context.files, isNotEmpty);
-    expect(context.files.map((file) => file.path), contains('lib/main.dart'));
-    expect(context.warnings.single, contains('No lexical or architecture match'));
-  });
+      expect(context.files, isNotEmpty);
+      expect(context.files.map((file) => file.path), contains('lib/main.dart'));
+      expect(
+        context.warnings.single,
+        contains('No lexical or architecture match'),
+      );
+    },
+  );
 
   test('emits versioned JSON and readable Markdown', () async {
     final context = await ProjectContextEngine().build(
@@ -147,7 +157,7 @@ class InvoicePage {}
     expect(context.routes, hasLength(1));
     final markdown = context.toMarkdown();
     expect(markdown, startsWith('# Flower Task Context'));
-    expect(markdown, contains('invoiceRoute'));
+    expect(markdown, contains('`invoices` via `go_router`'));
     expect(markdown, contains('Relevant files'));
   });
 
