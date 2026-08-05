@@ -171,8 +171,7 @@ final class _SymbolCollector extends RecursiveAstVisitor<void> {
   void visitClassDeclaration(ClassDeclaration node) {
     final name = node.name.lexeme;
     final supertypes = <String>[
-      if (node.extendsClause != null)
-        node.extendsClause!.superclass.toSource(),
+      if (node.extendsClause != null) node.extendsClause!.superclass.toSource(),
       if (node.withClause != null)
         ...node.withClause!.mixinTypes.map((type) => type.toSource()),
       if (node.implementsClause != null)
@@ -278,7 +277,8 @@ final class _SymbolCollector extends RecursiveAstVisitor<void> {
       routes.add(
         ProjectRoute(
           router: router,
-          path: _stringValue(pathExpression) ??
+          path:
+              _stringValue(pathExpression) ??
               (router == 'get' ? _stringValue(nameExpression) : null),
           name: router == 'get' ? null : _stringValue(nameExpression),
           declaration: declarationExpression?.toSource(),
@@ -326,8 +326,9 @@ final class _SymbolCollector extends RecursiveAstVisitor<void> {
     if (initializer.isEmpty) {
       return false;
     }
-    return RegExp(r'\b[A-Za-z0-9_]*Provider\s*(?:<[^;]+>)?\s*\(')
-        .hasMatch(initializer);
+    return RegExp(
+      r'\b[A-Za-z0-9_]*Provider\s*(?:<[^;]+>)?\s*\(',
+    ).hasMatch(initializer);
   }
 
   String? _routerForType(String type) {
