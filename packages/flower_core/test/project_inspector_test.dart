@@ -85,9 +85,7 @@ flutter:
     expect(result.skippedFiles, contains('AGENTS.md'));
     expect(await agentsFile.readAsString(), 'Existing project instructions.');
     expect(
-      await File(
-        p.join(project.path, '.flower', 'flower.yaml'),
-      ).readAsString(),
+      await File(p.join(project.path, '.flower', 'flower.yaml')).readAsString(),
       contains('name: "sample_app"'),
     );
   });
