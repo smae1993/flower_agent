@@ -197,7 +197,9 @@ final class FlowerCli {
     ProjectMap projectMap, {
     String? requestedFeature,
   }) {
-    final generatedCount = projectMap.nodes.where((node) => node.generated).length;
+    final generatedCount = projectMap.nodes
+        .where((node) => node.generated)
+        .length;
     output
       ..writeln('Flower Agent project map')
       ..writeln('Project: ${projectMap.packageName}')
@@ -318,11 +320,7 @@ final class FlowerCli {
         negatable: false,
         help: 'Write the stable machine-readable project map.',
       )
-      ..addFlag(
-        'mermaid',
-        negatable: false,
-        help: 'Write a Mermaid flowchart.',
-      )
+      ..addFlag('mermaid', negatable: false, help: 'Write a Mermaid flowchart.')
       ..addFlag('help', abbr: 'h', negatable: false);
 
     return ArgParser()
