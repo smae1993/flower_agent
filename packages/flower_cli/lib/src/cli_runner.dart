@@ -14,7 +14,7 @@ final class FlowerCli {
   }) : _inspector = inspector,
        _initializer = initializer ?? ProjectInitializer(inspector: inspector),
        _mapper = mapper ?? ProjectMapper(inspector: inspector),
-       _symbolIndexer = symbolIndexer,
+       _architectureIndexer = symbolIndexer,
        _parser = _buildParser();
 
   static const String version = '0.2.0-dev.2';
@@ -22,7 +22,7 @@ final class FlowerCli {
   final ProjectInspector _inspector;
   final ProjectInitializer _initializer;
   final ProjectMapper _mapper;
-  final ProjectSymbolIndexer _symbolIndexer;
+  final ProjectSymbolIndexer _architectureIndexer;
   final ArgParser _parser;
 
   Future<int> run(
@@ -158,7 +158,7 @@ final class FlowerCli {
     final kind = requestedKind == null
         ? null
         : _symbolKindByName(requestedKind);
-    final index = (await _symbolIndexer.build(
+    final index = (await _architectureIndexer.build(
       projectPath,
     )).filtered(kind: kind, feature: feature);
 
