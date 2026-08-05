@@ -159,7 +159,8 @@ final class ProjectInitializer {
         ..writeln('## Routes')
         ..writeln();
       for (final route in snapshot.routes) {
-        final label = route.name ?? route.path ?? route.declaration ?? '<unnamed>';
+        final label =
+            route.name ?? route.path ?? route.declaration ?? '<unnamed>';
         buffer.writeln(
           '- `$label` via `${route.router}` in `${route.sourcePath}:${route.line}`',
         );
