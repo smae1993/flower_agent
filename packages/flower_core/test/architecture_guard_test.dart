@@ -63,43 +63,47 @@ class OrderPage {}
     }
   });
 
-  test('reports dependency cycles, layer direction, and Flutter in domain', () async {
-    final report = await ArchitectureGuard().inspect(project.path);
+  test(
+    'reports dependency cycles, layer direction, and Flutter in domain',
+    () async {
+      final report = await ArchitectureGuard().inspect(project.path);
 
-    expect(report.packageName, 'guard_sample');
-    expect(
-      report.enabledRules,
-      <String>[
-        'dependency_cycle',
-        'layer_dependency',
-        'domain_flutter_dependency',
-      ],
-    );
-    expect(
-      report.violations.map((violation) => violation.ruleId),
-      containsAll(<String>[
-        'dependency_cycle',
-        'layer_dependency',
-        'domain_flutter_dependency',
-      ]),
-    );
-    expect(
-      report.violations
-          .where((violation) => violation.ruleId == 'layer_dependency'),
-      hasLength(3),
-    );
-    expect(
-      report.violations
-          .singleWhere(
-            (violation) => violation.ruleId == 'domain_flutter_dependency',
-          )
-          .path,
-      endsWith('domain/order.dart'),
-    );
-    expect(report.hasViolationsAtOrAbove(GuardSeverity.error), isTrue);
-    expect(report.toJson()['schemaVersion'], GuardReport.schemaVersion);
-    expect(report.toJson()['passed'], isFalse);
-  });
+      expect(report.packageName, 'guard_sample');
+      expect(
+        report.enabledRules,
+        <String>[
+          'dependency_cycle',
+          'layer_dependency',
+          'domain_flutter_dependency',
+        ],
+      );
+      expect(
+        report.violations.map((violation) => violation.ruleId),
+        containsAll(<String>[
+          'dependency_cycle',
+          'layer_dependency',
+          'domain_flutter_dependency',
+        ]),
+      );
+      expect(
+        report.violations.where(
+          (violation) => violation.ruleId == 'layer_dependency',
+        ),
+        hasLength(3),
+      );
+      expect(
+        report.violations
+            .singleWhere(
+              (violation) => violation.ruleId == 'domain_flutter_dependency',
+            )
+            .path,
+        endsWith('domain/order.dart'),
+      );
+      expect(report.hasViolationsAtOrAbove(GuardSeverity.error), isTrue);
+      expect(report.toJson()['schemaVersion'], GuardReport.schemaVersion);
+      expect(report.toJson()['passed'], isFalse);
+    },
+  );
 
   test('passes a correctly directed clean architecture fixture', () async {
     await project.delete(recursive: true);
