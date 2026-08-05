@@ -96,10 +96,14 @@ flutter:
     final emptyDirectory = await Directory.systemTemp.createTemp(
       'flower_empty_test_',
     );
-    addTearDown(() => emptyDirectory.delete(recursive: true));
+    addTearDown(() async {
+      if (await emptyDirectory.exists()) {
+        await emptyDirectory.delete(recursive: true);
+      }
+    });
 
-    expect(
-      () => const ProjectInspector().inspect(emptyDirectory.path),
+    await expectLater(
+      const ProjectInspector().inspect(emptyDirectory.path),
       throwsA(isA<FlowerException>()),
     );
   });
