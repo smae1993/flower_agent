@@ -89,6 +89,13 @@ final class ProjectInitializer {
       ..writeln(
         '  style: ${snapshot.featureNames.isEmpty ? 'unclassified' : 'feature_first'}',
       )
+      ..writeln('  detected:');
+
+    for (final entry in snapshot.symbolCounts.entries) {
+      buffer.writeln('    ${entry.key}: ${entry.value}');
+    }
+    buffer
+      ..writeln('    routes: ${snapshot.routes.length}')
       ..writeln('technologies:');
 
     if (snapshot.technologies.isEmpty) {
@@ -139,6 +146,28 @@ final class ProjectInitializer {
 
     buffer
       ..writeln()
+      ..writeln('## Architecture symbols')
+      ..writeln();
+    for (final entry in snapshot.symbolCounts.entries) {
+      buffer.writeln('- ${entry.key}: `${entry.value}`');
+    }
+    buffer.writeln('- routes: `${snapshot.routes.length}`');
+
+    if (snapshot.routes.isNotEmpty) {
+      buffer
+        ..writeln()
+        ..writeln('## Routes')
+        ..writeln();
+      for (final route in snapshot.routes) {
+        final label = route.name ?? route.path ?? route.declaration ?? '<unnamed>';
+        buffer.writeln(
+          '- `$label` via `${route.router}` in `${route.sourcePath}:${route.line}`',
+        );
+      }
+    }
+
+    buffer
+      ..writeln()
       ..writeln('## Features')
       ..writeln();
     if (snapshot.featureNames.isEmpty) {
@@ -154,8 +183,9 @@ final class ProjectInitializer {
       ..writeln('## Next steps')
       ..writeln()
       ..writeln('1. Review `.flower/flower.yaml`.')
-      ..writeln('2. Add project-specific architecture rules and decisions.')
-      ..writeln('3. Run `flower inspect` after major structural changes.');
+      ..writeln('2. Run `flower symbols --json` for declaration-level context.')
+      ..writeln('3. Add project-specific architecture rules and decisions.')
+      ..writeln('4. Run `flower inspect` after major structural changes.');
     return buffer.toString();
   }
 
@@ -168,9 +198,10 @@ Before changing code:
 
 1. Read `.flower/context/project.md`.
 2. Respect `.flower/flower.yaml` and project-local architecture decisions.
-3. Inspect the project when the stored context may be stale.
-4. Keep changes inside the appropriate feature and layer.
-5. Run formatting, analysis, and relevant tests before completion.
+3. Use `flower symbols --json` when declaration-level context is needed.
+4. Inspect the project when the stored context may be stale.
+5. Keep changes inside the appropriate feature and layer.
+6. Run formatting, analysis, and relevant tests before completion.
 
 Do not overwrite project configuration or generated context without explaining the change.
 ''';
