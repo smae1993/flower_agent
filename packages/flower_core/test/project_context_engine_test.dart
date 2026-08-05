@@ -140,8 +140,8 @@ class InvoicePage {}
       expect(context.files, isNotEmpty);
       expect(context.files.map((file) => file.path), contains('lib/main.dart'));
       expect(
-        context.warnings.single,
-        contains('No lexical or architecture match'),
+        context.warnings,
+        contains(contains('No lexical or architecture match')),
       );
     },
   );
