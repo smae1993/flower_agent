@@ -25,10 +25,11 @@ Flower turns a Flutter repository into structured project intelligence that agen
 
 The repository is in active early development. The current vertical slice provides:
 
-- `flower inspect` — detect Flutter technologies, feature folders, source files, generated files, and tests;
+- `flower inspect` — detect Flutter technologies, features, source files, tests, architecture roles, and routes;
 - `flower init` — create a project-local `.flower` workspace and agent bootstrap instructions;
 - `flower map` — build an analyzer-backed internal dependency graph, find cycles, and export JSON or Mermaid;
-- feature-scoped project maps for focused agent context;
+- `flower symbols` — index repositories, services, providers, controllers, data sources, and routes;
+- feature-scoped project maps and symbol indexes for focused agent context;
 - deterministic, local-only analysis with no API key or cloud service.
 
 ## Quick start
@@ -62,13 +63,32 @@ flower map --mermaid
 flower map --feature invoices --json
 ```
 
+Index architecture symbols and routes:
+
+```bash
+flower symbols
+flower symbols --json
+flower symbols --kind repository --json
+flower symbols --feature invoices --json
+```
+
+Supported symbol roles currently include:
+
+- repositories and repository implementations;
+- services;
+- providers, including top-level provider declarations and `@riverpod` functions;
+- controllers, cubits, blocs, notifiers, and view models;
+- data sources and DAOs.
+
+Supported route constructors currently include GoRouter `GoRoute`, AutoRoute `AutoRoute` and `RouteConfig`, and GetX `GetPage`.
+
 `flower map` parses Dart directives with the Dart analyzer. It resolves same-package imports, exports, and parts, reports external packages per file, marks generated files, detects feature-first paths, and identifies strongly connected dependency cycles.
 
 The initialization command creates files only when they do not already exist. It does not overwrite an existing `AGENTS.md` or Flower configuration.
 
-## Project map formats
+## Machine-readable contracts
 
-Human-readable output provides a compact graph summary and cycle report. JSON output uses a versioned schema intended for agents and scripts:
+Project map JSON uses a versioned schema:
 
 ```json
 {
@@ -77,6 +97,24 @@ Human-readable output provides a compact graph summary and cycle report. JSON ou
   "nodes": [],
   "edges": [],
   "cycles": []
+}
+```
+
+Symbol index JSON is also versioned:
+
+```json
+{
+  "schemaVersion": "1.0.0",
+  "packageName": "example_app",
+  "counts": {
+    "repository": 0,
+    "service": 0,
+    "provider": 0,
+    "controller": 0,
+    "dataSource": 0
+  },
+  "symbols": [],
+  "routes": []
 }
 ```
 
@@ -107,7 +145,7 @@ See [ROADMAP.md](ROADMAP.md) and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ```text
 packages/
-├── flower_core/    # Project models, inspection, maps, and initialization
+├── flower_core/    # Project models, inspection, maps, symbols, and initialization
 └── flower_cli/     # The `flower` command-line application
 
 docs/               # Product and architecture documentation
