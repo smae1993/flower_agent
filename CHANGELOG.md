@@ -28,11 +28,16 @@ The project follows Semantic Versioning once a stable public API is published.
 - Configurable file-count context limits.
 - Initial Persian task aliases for common project terminology.
 - Deterministic entry-point fallback when a task has no lexical match.
+- Public architecture-rule API with versioned guard violations and reports.
+- Built-in dependency-cycle, clean-layer direction, and Flutter-in-domain rules.
+- `flower guard` with human-readable and JSON reports.
+- Configurable `--fail-on` severity and CI-friendly exit code `3`.
+- Custom rule injection through `ArchitectureGuard`.
 
 ### Changed
 
 - Project snapshot JSON schema advanced to version 2 to include architecture data.
-- Development package versions advanced to `0.3.0-dev.1`.
+- Development package versions advanced to `0.4.0-dev.1`.
 
 ## 0.1.0-dev.1
 
