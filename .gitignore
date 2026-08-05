@@ -1,0 +1,22 @@
+# Dart and Flutter
+.dart_tool/
+.packages
+build/
+coverage/
+.pub/
+.pub-cache/
+pubspec.lock
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# Operating systems
+.DS_Store
+Thumbs.db
+
+# Local tooling
+*.log
+.env
+pubspec_overrides.yaml
