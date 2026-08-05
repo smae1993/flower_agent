@@ -1,6 +1,8 @@
 library;
 
 export 'src/flower_exception.dart';
+export 'src/project_context.dart';
+export 'src/project_context_engine.dart';
 export 'src/project_initializer.dart';
 export 'src/project_inspector.dart';
 export 'src/project_map.dart';
