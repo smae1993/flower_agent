@@ -169,7 +169,7 @@ final class _SymbolCollector extends RecursiveAstVisitor<void> {
 
   @override
   void visitClassDeclaration(ClassDeclaration node) {
-    final name = node.name.lexeme;
+    final name = node.namePart.typeName.lexeme;
     final supertypes = <String>[
       if (node.extendsClause != null) node.extendsClause!.superclass.toSource(),
       if (node.withClause != null)
@@ -343,8 +343,8 @@ final class _SymbolCollector extends RecursiveAstVisitor<void> {
 
   Expression? _namedArgument(ArgumentList arguments, String name) {
     for (final argument in arguments.arguments) {
-      if (argument is NamedExpression && argument.name.label.name == name) {
-        return argument.expression;
+      if (argument is NamedArgument && argument.name.lexeme == name) {
+        return argument.argumentExpression;
       }
     }
     return null;
