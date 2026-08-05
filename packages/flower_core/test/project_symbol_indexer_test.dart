@@ -48,10 +48,7 @@ Future<int> invoiceTotal(InvoiceTotalRef ref) async => 0;
       'lib/core/services/api_service.dart',
       'class ApiService {}\n',
     );
-    await _writeProjectFile(
-      project,
-      'lib/app_router.dart',
-      '''
+    await _writeProjectFile(project, 'lib/app_router.dart', '''
 final routes = <Object>[
   GoRoute(
     path: '/invoices',
@@ -61,8 +58,7 @@ final routes = <Object>[
   AutoRoute(path: '/settings', page: SettingsRoute.page),
   GetPage(name: '/login', page: () => LoginPage()),
 ];
-''',
-    );
+''');
     await _writeProjectFile(
       project,
       'lib/features/invoices/application/invoice_controller.g.dart',
@@ -145,7 +141,10 @@ final routes = <Object>[
       isTrue,
     );
     expect(repositories.routes, isEmpty);
-    expect(repositories.toJson()['schemaVersion'], ProjectSymbolIndex.schemaVersion);
+    expect(
+      repositories.toJson()['schemaVersion'],
+      ProjectSymbolIndex.schemaVersion,
+    );
   });
 }
 
