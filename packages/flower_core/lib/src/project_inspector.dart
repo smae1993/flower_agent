@@ -5,10 +5,15 @@ import 'package:yaml/yaml.dart';
 
 import 'flower_exception.dart';
 import 'project_snapshot.dart';
+import 'project_symbol_indexer.dart';
 
 /// Inspects a Dart or Flutter project without executing project code.
 final class ProjectInspector {
-  const ProjectInspector();
+  const ProjectInspector({
+    ProjectSymbolIndexer symbolIndexer = const ProjectSymbolIndexer(),
+  }) : _symbolIndexer = symbolIndexer;
+
+  final ProjectSymbolIndexer _symbolIndexer;
 
   static const Map<String, List<String>> _technologyCandidates =
       <String, List<String>>{
@@ -93,6 +98,7 @@ final class ProjectInspector {
     );
     final featureNames = await _detectFeatures(root);
     final technologies = _detectTechnologies(dependencyNames);
+    final symbolIndex = await _symbolIndexer.build(root.path);
 
     final warnings = <String>[];
     if (!isFlutterProject) {
@@ -119,6 +125,11 @@ final class ProjectInspector {
       integrationTestFileCount: integrationTestFileCount,
       featureNames: featureNames,
       technologies: technologies,
+      symbolCounts: <String, int>{
+        for (final entry in symbolIndex.counts.entries)
+          entry.key.name: entry.value,
+      },
+      routes: symbolIndex.routes,
       warnings: warnings,
     );
   }
