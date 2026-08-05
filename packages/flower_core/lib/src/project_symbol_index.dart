@@ -1,11 +1,5 @@
 /// Architectural roles detected from Dart declarations.
-enum ProjectSymbolKind {
-  repository,
-  service,
-  provider,
-  controller,
-  dataSource,
-}
+enum ProjectSymbolKind { repository, service, provider, controller, dataSource }
 
 /// One architecture-relevant declaration inside a Dart or Flutter project.
 final class ProjectSymbol {
