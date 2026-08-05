@@ -101,18 +101,21 @@ final class ProjectMapNode {
     required this.id,
     required this.path,
     required this.feature,
+    required this.generated,
     required this.externalPackages,
   });
 
   final String id;
   final String path;
   final String? feature;
+  final bool generated;
   final List<String> externalPackages;
 
   Map<String, Object?> toJson() => <String, Object?>{
     'id': id,
     'path': path,
     'feature': feature,
+    'generated': generated,
     'externalPackages': externalPackages,
   };
 }
